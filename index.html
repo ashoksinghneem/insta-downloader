@@ -62,14 +62,23 @@
             const data = await res.json();
             loading.style.display = "none";
 
-            const posts = data?.data?.items || data?.items || [];
+            // Flexible Data Parsing
+            let posts = [];
+            if (Array.isArray(data)) posts = data;
+            else if (data?.data?.items) posts = data.data.items;
+            else if (data?.items) posts = data.items;
+            else if (data?.data?.user?.edge_owner_to_timeline_media?.edges) {
+                posts = data.data.user.edge_owner_to_timeline_media.edges.map(e => e.node);
+            }
 
             if (!posts.length) {
                 return alert("Koi post nahi mili ya account private hai.");
             }
 
             posts.forEach((post, i) => {
-                const imgUrl = post.image_versions2?.candidates?.[0]?.url || post.display_url;
+                const imgUrl = post.image_versions2?.candidates?.[0]?.url 
+                            || post.display_url 
+                            || post.thumbnail_src;
                 if (!imgUrl) return;
 
                 const card = document.createElement("div");
@@ -85,7 +94,7 @@
             controls.style.display = "flex";
         } catch (err) {
             loading.style.display = "none";
-            alert("Posts load karne me error aaya. Username check karein.");
+            alert("Posts load karne me error aaya.");
         }
     }
 
@@ -112,4 +121,4 @@
 </script>
 
 </body>
-</html>
+</html>                
