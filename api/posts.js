@@ -1,9 +1,15 @@
 export default async function handler(req, res) {
-    const { username } = req.query;
+    let { username } = req.query;
 
     if (!username) {
         return res.status(400).json({ error: 'Username required' });
     }
+
+    // Clean username if user enters a full URL
+    username = username.trim()
+        .replace(/https?:\/\/(www\.)?instagram\.com\//, '')
+        .replace(/\/$/, '')
+        .split('?')[0];
 
     try {
         const response = await fetch('https://instagram-scraper-stable-api.p.rapidapi.com/get_ig_user_posts.php', {
